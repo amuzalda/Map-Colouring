@@ -1,33 +1,19 @@
 #include <iostream>
+#include <stdio.h>
+#include <queue>
+#include <utility>
 #include <fstream>
-#include<stdio.h>
+
 
 using namespace std;
 
 // Number of vertices in the graph
-#define V 9
+#define V 15
 // NUmber of coloures
-#define m 3
-
+#define m 4
 
 void printSolution(int color[]);
-/*
-function B ACKTRACKING -S EARCH (csp) returns a solution, or failure
-return R ECURSIVE -B ACKTRACKING ({ }, csp)
 
-function R ECURSIVE -B ACKTRACKING (assignment , csp) returns a solution, or failure
-if assignment is complete then return assignment
-var ← S ELECT -U NASSIGNED -V ARIABLE (V ARIABLES [csp], assignment , csp)
-for each value in O RDER -D OMAIN -V ALUES (var , assignment, csp) do
-  if value is consistent with assignment according to C ONSTRAINTS [csp] then
-  add {var = value} to assignment
-  result ← R ECURSIVE -B ACKTRACKING (assignment , csp)
-  if result 6 = failure then return result
-  remove {var = value} from assignment
-return failure*/
-
-/* A utility function to check if the current color assignment
-   is safe for vertex v */
 bool goal(int color[]){
 
    for(int i=0;i<V;i++){
@@ -39,7 +25,52 @@ bool goal(int color[]){
 
      return true;
 }
+// returns the vertex having minimum value remains in domain
+int select_unassigned_var(int color[],int domain[V][m]){
 
+  int index,rem_val=m;
+  int k;
+  k=m;
+
+  int r=0;
+  for (int i = 0; i < V; i++){
+      r=0;
+     if(color[i]==0){
+       for(int j=0;j<k;j++){
+         if(domain[i][j]!=0)
+           r++;
+       }
+    if(r<rem_val){
+      index=i;
+    }
+
+
+  }
+  }
+  return index;
+}
+
+bool remove_incon_val(int x,int y,int domain[V][m]){
+  bool removed=false;
+  int c,flag;
+
+  for(int i=0;i<m;i++){
+    c=domain[x][i];
+    flag=0;
+    for (int j = 0; j < m; j++)
+        if (domain[y][j]!=0&&i!=j ){
+           flag=1;
+        }
+  if(flag ==0){
+     domain[x][i]=0;
+     removed=true;
+     }
+     else removed=false;
+
+  }
+
+  return removed;
+}
 
 
 void update_domain(int c,int v,bool graph[V][V],int domain[V][m]){
@@ -50,6 +81,32 @@ void update_domain(int c,int v,bool graph[V][V],int domain[V][m]){
 
 }
 
+
+
+
+bool arc3(bool graph[V][V],int domain[V][m]){
+  pair<int,int> x;
+
+   queue<pair<int,int> > q;
+   for(int i=0;i<V;i++){
+     for(int j=0;j<V;j++){
+        if(graph[i][j]!=0)
+           q.push(make_pair(i,j));
+     }
+   }
+   while (q.empty()) {
+     x=q.front();
+       if(remove_incon_val(x.first,x.second,domain)){
+         for(int i=0;i<V;i++){
+           if(graph[x.first][i]!=0)
+           q.push(make_pair(x.first,i));
+         }
+       }
+
+     /* code */
+   }
+
+}
 bool isSafe (int v, bool graph[V][V], int color[], int c)
 {
     for (int i = 0; i < V; i++)
@@ -58,7 +115,9 @@ bool isSafe (int v, bool graph[V][V], int color[], int c)
     return true;
 }
 
-/* A recursive utility function to solve m coloring problem */
+
+
+
 bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
 {
     /* base case: If all vertices are assigned a color then
@@ -66,7 +125,7 @@ bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
     if(goal(color)) // check for goal test
         return true;
 
-
+    int var;
     /* Consider this vertex v and try different colors */
     for (int c = 0; c < m; c++)
     {
@@ -78,8 +137,8 @@ bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
            update_domain(color[v],v,graph,domain);//upate the domain of adjacent vertixes
 
            /* recur to assign colors to rest of the vertices */
-
-           if (graphColoringUtil(graph, color, v+1,domain) == true)
+             var=select_unassigned_var(color,domain);
+           if (graphColoringUtil(graph, color, var,domain) == true)
              return true;
 
             /* If assigning color c doesn't lead to a solution
@@ -92,14 +151,10 @@ bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
     return false;
 }
 
-/* This function solves the m Coloring problem using Backtracking.
-  It mainly uses graphColoringUtil() to solve the problem. It returns
-  false if the m colors cannot be assigned, otherwise return true and
-  prints assignments of colors to all vertices. Please note that there
-  may be more than one solutions, this function prints one of the
-  feasible solutions.*/
+
+
 bool graphColoring(bool graph[V][V], int domain[V][m])
-{
+{   arc3(graph,domain);
 
     // Initialize all color values as 0. This initialization is needed
     // correct functioning of isSafe()
@@ -137,11 +192,12 @@ void inti_domain(int domain[V][m]){
 }
 
 }
-// driver program to test above function
+
 int main()
-{   fstream fin;
+{
+   fstream fin;
      int a;
-    fin.open("input9.txt");
+    fin.open("input10.txt");
     int domain[V][m];
     inti_domain(domain);
     bool graph[V][V];
@@ -150,15 +206,6 @@ int main()
         fin>>a;
         graph[i][j]=a;
       }
-    /* Create following graph and test whether it is 3 colorable
-      (3)---(2)
-       |   / |
-       |  /  |
-       | /   |
-      (0)---(1)
-    */
-    
-
     graphColoring (graph,domain);
     return 0;
 }

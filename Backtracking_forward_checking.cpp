@@ -1,13 +1,13 @@
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
-#include<stdio.h>
 
 using namespace std;
 
 // Number of vertices in the graph
-#define V 9
+#define V 15
 // NUmber of coloures
-#define m 3
+#define m 4
 
 
 void printSolution(int color[]);
@@ -39,8 +39,30 @@ bool goal(int color[]){
 
      return true;
 }
+// returns the vertex having minimum value remains in domain
+int select_unassigned_var(int color[],int domain[V][m]){
+
+  int index,rem_val=m;
+  int k;
+  k=m;
+
+  int r=0;
+  for (int i = 0; i < V; i++){
+      r=0;
+     if(color[i]==0){
+       for(int j=0;j<k;j++){
+         if(domain[i][j]!=0)
+           r++;
+       }
+    if(r<rem_val){
+      index=i;
+    }
 
 
+  }
+  }
+  return index;
+}
 
 void update_domain(int c,int v,bool graph[V][V],int domain[V][m]){
   for (int i = 0; i < V; i++)
@@ -66,7 +88,7 @@ bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
     if(goal(color)) // check for goal test
         return true;
 
-
+    int var;
     /* Consider this vertex v and try different colors */
     for (int c = 0; c < m; c++)
     {
@@ -78,8 +100,8 @@ bool graphColoringUtil(bool graph[V][V], int color[], int v, int domain[V][m])
            update_domain(color[v],v,graph,domain);//upate the domain of adjacent vertixes
 
            /* recur to assign colors to rest of the vertices */
-
-           if (graphColoringUtil(graph, color, v+1,domain) == true)
+             var=select_unassigned_var(color,domain);
+           if (graphColoringUtil(graph, color, var,domain) == true)
              return true;
 
             /* If assigning color c doesn't lead to a solution
@@ -139,9 +161,10 @@ void inti_domain(int domain[V][m]){
 }
 // driver program to test above function
 int main()
-{   fstream fin;
+{
+    fstream fin;
      int a;
-    fin.open("input9.txt");
+    fin.open("input10.txt");
     int domain[V][m];
     inti_domain(domain);
     bool graph[V][V];
@@ -150,14 +173,6 @@ int main()
         fin>>a;
         graph[i][j]=a;
       }
-    /* Create following graph and test whether it is 3 colorable
-      (3)---(2)
-       |   / |
-       |  /  |
-       | /   |
-      (0)---(1)
-    */
-    
 
     graphColoring (graph,domain);
     return 0;
